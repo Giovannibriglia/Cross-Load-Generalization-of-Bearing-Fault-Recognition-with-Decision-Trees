@@ -1,59 +1,20 @@
-import os
 import glob
-import matplotlib.pyplot as plt
-import pandas as pd
-import csv
-import numpy as np
-from scipy.fftpack import fft, fftfreq
-from scipy import stats, signal
-import math
-from sklearn.linear_model import LinearRegression
+import os
 import warnings
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+from scipy import stats, signal
+from scipy.fftpack import fft, fftfreq
 
 warnings.filterwarnings('ignore')
 
 sample_rate_cutted = 25000
 seconds_of_acquistion = 10
-path_inputs = 'Curr_SV_NO_offset'
-path_saving = 'dataframes_curr'
+path_inputs = 'Vibr_MODULE_NO_offset'
+path_saving = 'dataframes_module'
 fontsize = 12
 labelsize = 12
-
-
-def removing_50Hz_reference(data, time_in_sec, if_vis):
-    vet = []
-
-    for i in range(0, int(len(data) * time_in_sec), 1):
-        x = data.iloc[i]
-        x2 = x.replace("i", "j")
-        x3 = complex(x2)
-        real = x3.real
-        img = x3.imag
-        phase = math.atan2(real, img) * 180 / np.pi
-        vet.append(phase.real)
-
-    vet_unwrapped = np.unwrap(vet)
-
-    linear_regression = LinearRegression().fit(np.arange(len(vet_unwrapped)).reshape(-1, 1), np.array(vet_unwrapped))
-    slope = linear_regression.coef_
-    intercept = linear_regression.intercept_
-    linear_function = np.arange(len(vet_unwrapped)) * slope + intercept
-
-    vetFin_no_offset = np.array(vet_unwrapped) - np.array(linear_function)
-
-    if if_vis:
-        fig = plt.figure(dpi=500)
-        fig.suptitle(f'Removing 50Hz reference from D{indexD}-R{indexR}-T{indexT}', fontsize=fontsize + 5)
-        plt.plot(vet_unwrapped, label='unwrapped phase', linewidth=3)
-        plt.plot(linear_function, label='linear function')
-        plt.legend(loc='best')
-        plt.xlabel('Samples', fontsize=fontsize)
-        plt.ylabel('Degrees [°]', fontsize=fontsize)
-        plt.tick_params(axis='x', labelsize=labelsize)
-        plt.tick_params(axis='y', labelsize=labelsize)
-        plt.grid()
-
-    return vetFin_no_offset
 
 
 def notch_filter(vet, notch_freq, quality):
@@ -130,9 +91,8 @@ for max_frequency in [375, 125, 75]:
                     in2 = count + int(half_sample_rate)
 
                     input_data = data.iloc[in1:in2, 0]
-                    vet_without_50ref = removing_50Hz_reference(data=input_data, time_in_sec=1, if_vis=if_vis)
 
-                    vet_Notch = vet_without_50ref.copy()
+                    vet_Notch = input_data.copy()
                     for notch_frequency in range(50, 550, 50):
                         vet_Notch = notch_filter(vet=vet_Notch, notch_freq=notch_frequency, quality=10.0)
 
@@ -141,18 +101,7 @@ for max_frequency in [375, 125, 75]:
                         values_for_fft_plots.append(yfl)
 
                     if if_vis:
-                        fig = plt.figure(dpi=600)
-                        fig.suptitle(f'Notch filters on D{indexD}-R{indexR}-T{indexT}', fontsize=fontsize + 5)
-                        plt.plot(vet_without_50ref[0:2500], label='before')
-                        plt.plot(vet_Notch[0:2500], label='after')
-                        plt.legend(loc='best')
-                        plt.xlabel('Samples', fontsize=fontsize)
-                        plt.ylabel('Degrees [°]', fontsize=fontsize)
-                        plt.tick_params(axis='x', labelsize=labelsize)
-                        plt.tick_params(axis='y', labelsize=labelsize)
-                        plt.grid()
-
-                        yfl_wrong, xfl_wrong = FFT(vet=vet_without_50ref, time_in_sec=1)
+                        yfl_wrong, xfl_wrong = FFT(vet=input_data.values, time_in_sec=1)
 
                         fig = plt.figure(dpi=600)
                         fig.suptitle(f'FFT on D{indexD}-R{indexR}-T{indexT}', fontsize=fontsize + 5)
@@ -163,9 +112,9 @@ for max_frequency in [375, 125, 75]:
                         plt.ylabel('Amplitude', fontsize=fontsize)
                         plt.tick_params(axis='x', labelsize=labelsize)
                         plt.tick_params(axis='y', labelsize=labelsize)
-                        plt.ylim(0, 1)
+                        # plt.ylim(0, 1)
                         plt.grid()
-                        plt.savefig('FFT_HealtyCase_NotchFilters2.pdf')
+                        # plt.savefig('FFT_HealtyCase_NotchFilters.pdf')
                         plt.show()
 
                     row = []
@@ -221,7 +170,6 @@ for max_frequency in [375, 125, 75]:
             axes[val].plot(x, values_for_fft_plots[val][:500], linewidth=2)
             axes[val].set_title(f'D{val + 1}-R{indexR}-T{indexT} {azz[val]}', fontsize=fontsize + 5)
             axes[val].set_ylabel('Amplitude', fontsize=fontsize)
-            axes[val].set_yticks([0.0, 0.25, 0.5])
             axes[val].grid(True)
         axes[len(values_for_fft_plots) - 1].set_xlabel('Hz', fontsize=fontsize)
         plt.tight_layout()

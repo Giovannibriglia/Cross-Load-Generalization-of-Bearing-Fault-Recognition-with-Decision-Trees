@@ -27,9 +27,10 @@ label_encoder = LabelEncoder()
 fontsize = 12
 
 max_evals = 10
-n_optimizations = 1000
-path_res = 'results_curr'
-path_input = 'dataframes_curr'
+n_optimizations = 500
+
+path_res = 'results_mono'
+path_input = 'dataframes_mono'
 os.makedirs(path_res, exist_ok=True)
 
 
