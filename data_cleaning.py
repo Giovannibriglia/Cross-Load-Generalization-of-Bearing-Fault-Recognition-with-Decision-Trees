@@ -6,7 +6,6 @@ import numpy as np
 import pandas as pd
 from scipy import stats, signal
 from scipy.fftpack import fft, fftfreq
-
 warnings.filterwarnings('ignore')
 
 sample_rate_cutted = 25000
