@@ -10,8 +10,8 @@ warnings.filterwarnings('ignore')
 
 sample_rate_cutted = 25000
 seconds_of_acquistion = 10
-path_inputs = 'Vibr_MODULE_NO_offset'
-path_saving = 'dataframes_module'
+path_inputs = 'Vibr_MONO_NO_offset'
+path_saving = 'dataframes_mono'
 fontsize = 12
 labelsize = 12
 
@@ -90,17 +90,32 @@ for max_frequency in [375, 125, 75]:
                     in2 = count + int(half_sample_rate)
 
                     input_data = data.iloc[in1:in2, 0]
+                    mean_input_data = np.mean(input_data)
+                    input_data = [s-mean_input_data for s in input_data]
 
                     vet_Notch = input_data.copy()
                     for notch_frequency in range(50, 550, 50):
                         vet_Notch = notch_filter(vet=vet_Notch, notch_freq=notch_frequency, quality=10.0)
+
+                    if if_vis:
+                        fig = plt.figure(dpi=600)
+                        fig.suptitle(f'Notch Filters on D{indexD}-R{indexR}-T{indexT}', fontsize=fontsize + 5)
+                        plt.plot(input_data[:100], label='Before notch filters', linewidth=2)
+                        plt.plot(vet_Notch[:100], label='After notch filters', linewidth=2)
+                        plt.legend(loc='best')
+                        plt.xlabel('Time', fontsize=fontsize)
+                        plt.ylabel('Amplitude', fontsize=fontsize)
+                        plt.tick_params(axis='x', labelsize=labelsize)
+                        plt.tick_params(axis='y', labelsize=labelsize)
+                        plt.grid()
+
 
                     yfl, xfl = FFT(vet=vet_Notch, time_in_sec=1)
                     if count == half_sample_rate and (indexR + indexT == 2):
                         values_for_fft_plots.append(yfl)
 
                     if if_vis:
-                        yfl_wrong, xfl_wrong = FFT(vet=input_data.values, time_in_sec=1)
+                        yfl_wrong, xfl_wrong = FFT(vet=input_data, time_in_sec=1)
 
                         fig = plt.figure(dpi=600)
                         fig.suptitle(f'FFT on D{indexD}-R{indexR}-T{indexT}', fontsize=fontsize + 5)
