@@ -142,7 +142,7 @@ for alg in algorithms:
                 par1_test = load
                 par2_test = load
                 dataTrainVal = split_TRAIN.TRAIN(df_in, par1_test, par2_test)
-                dataset_validation, dataset_train = split_VALIDATION.setVal(dataTrainVal, val_size=0.2)
+                dataset_validation, dataset_train = split_VALIDATION.setVal(dataTrainVal, val_size=0.1)
                 dataset_test = split_TEST.TEST(df_in, par1_test, par2_test)
 
                 features_names = df_in.columns.to_list()[
