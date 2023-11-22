@@ -181,8 +181,9 @@ for max_frequency in [375, 125, 75]:
                     df.loc[row_number] = row
                     row_number += 1
 
-        if max_frequency == 375:
+        if max_frequency == 375 and n_classes == 2:
             fig_subplots, axes = plt.subplots(3, 1, sharex=True, dpi=600)
+            fig.suptitle('Spectra Resulting Monoaxial Accelerometer', fontsize=fontsize+3)
             x = np.arange(0, 500, 1)
             azz = [': Healthy case', ': Damage on the Outer Ring', ': Brinnelling Damage']
             for val in range(0, len(values_for_fft_plots), 2):
