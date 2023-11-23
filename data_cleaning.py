@@ -30,8 +30,7 @@ def apply_notch_filter(data, b, a):
 
 
 def FFT(vet, time_in_sec):
-    sample_rate = 25600
-    n = len(vet) * time_in_sec
+    n = len(vet)
     T = time_in_sec / n
     y = vet
     yf = fft(y)
@@ -54,8 +53,8 @@ features_names = ['mean', 'max', 'kurt', 'skew', 'mad', 'percScore', 'entropy', 
                   'coef_kstatvar', 'min', 'std_class', 'var']
 os.makedirs(path_saving, exist_ok=True)
 
-for max_frequency in [375]:
-    for n_classes in [2]:
+for max_frequency in [375, 125, 75]:
+    for n_classes in [2, 3]:
 
         features = ['name_signal']
         for value in [25, 50]:
@@ -89,7 +88,7 @@ for max_frequency in [375]:
 
                 for count in range(half_sample_rate, len(data) + half_sample_rate, half_sample_rate):
 
-                    if count == half_sample_rate and indexT + indexR == 20:
+                    if count == half_sample_rate and indexT + indexR == 2:
                         if_vis = True
                     else:
                         if_vis = False
@@ -102,7 +101,7 @@ for max_frequency in [375]:
                     input_data = [s-mean_input_data for s in input_data]
 
                     vet_Notch = input_data.copy()
-                    Q = 50  # Quality factor of the notch filter
+                    Q = 70  # Quality factor of the notch filter
                     for notch_frequency in range(50, 550, 50):
                         b, a = design_notch_filter(notch_frequency, Q, sample_rate)
                         vet_Notch = apply_notch_filter(vet_Notch, b, a)
@@ -118,7 +117,6 @@ for max_frequency in [375]:
                         plt.tick_params(axis='x', labelsize=labelsize)
                         plt.tick_params(axis='y', labelsize=labelsize)
                         plt.grid()
-
 
                     yfl, xfl = FFT(vet=vet_Notch, time_in_sec=1)
                     yfl_wrong, xfl_wrong = FFT(vet=input_data, time_in_sec=1)
@@ -209,7 +207,7 @@ for max_frequency in [375]:
                 # axes[int(val/2)].set_ylim(0, scales[int(val/2)])
                 axes[int(val/2)].grid(True)
             plt.tight_layout()
-            plt.savefig('ResultingSignal_Mono.pdf')
+            # plt.savefig('ResultingSignal_Mono.pdf')
             plt.show()
 
         to_del = []
