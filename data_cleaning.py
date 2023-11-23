@@ -73,7 +73,6 @@ for max_frequency in [375, 125, 75]:
         half_sample_rate = int(sample_rate / 2)
         values_for_fft_plots = []
 
-
         for filename in glob.glob(f"{path_inputs}\*.csv"):
             with open(os.path.join(os.getcwd(), filename), "r") as f:
                 data = pd.read_csv(filename)
